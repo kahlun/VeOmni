@@ -35,7 +35,6 @@ class BroadcastTestArguments:
     weights_path: str = ""
     device_type: str = get_device_type()
     backend: str = get_dist_comm_backend()
-    mode: str = "broadcast"  # "broadcast" | "load_weights"
 
 
 @dataclass
@@ -216,6 +215,7 @@ def run_rank0_broadcast_test(args: Arguments) -> None:
         extra_parallel_placement_innermost=args.train.accelerator.extra_parallel_placement_innermost,
         extra_parallel_names=args.train.accelerator.extra_parallel_names,
         dp_mode=args.train.accelerator.fsdp_config.fsdp_mode,
+        ep_outside=args.train.accelerator.ep_outside,
     )
 
     dtensor_factory = distribute_tensor if distribute_tensor is not None else None
@@ -406,6 +406,7 @@ def test_load_dist_model_weights_matches_standard(tmp_path: Path) -> None:
         f"--test.weights_path={weights_path}",
         f"--test.device_type={get_device_type()}",
         f"--test.backend={get_dist_comm_backend()}",
+<<<<<<< HEAD
         "--test.mode=broadcast",
     ]
 
@@ -570,6 +571,8 @@ def test_load_weights_no_scatter(tmp_path: Path) -> None:
         f"--test.device_type={get_device_type()}",
         f"--test.backend={get_dist_comm_backend()}",
         "--test.mode=load_weights",
+=======
+>>>>>>> parent of d545ede ([dist] fix: use src_data_rank=None in load_model_weights to skip redundant scatter (#648))
     ]
 
     result = subprocess.run(command, check=True)
@@ -578,7 +581,4 @@ def test_load_weights_no_scatter(tmp_path: Path) -> None:
 
 if __name__ == "__main__":
     args = parse_args(Arguments)
-    if getattr(args.test, "mode", "broadcast") == "load_weights":
-        run_load_weights_test(args)
-    else:
-        run_rank0_broadcast_test(args)
+    run_rank0_broadcast_test(args)
