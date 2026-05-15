@@ -9,7 +9,9 @@ cd "$VEOMNI_ROOT"
 
 # XPU environment variables
 export ZE_AFFINITY_MASK="0,1"
-export CCL_ATL_SHM=1
+export CCL_ATL_SHM=0
+export CCL_PROCESS_LAUNCHER=none
+export CCL_ZE_IPC_EXCHANGE=pidfd
 export CCL_BUFFER_CACHE=0
 export CCL_TOPO_FABRIC_VERTEX_CONNECTION_CHECK=0
 export CCL_TOPO_ALGO=0
@@ -24,7 +26,7 @@ echo "VeOmni e2e SFT Test on Intel XPU"
 echo "=========================================="
 echo "Model: Qwen2.5-0.5B-Instruct"
 echo "GPUs: 2 (XPU devices 0,1 via ZE_AFFINITY_MASK)"
-echo "Config: configs/xpu/text/qwen2_5_xpu.yaml (sdpa attention, fsdp1 trainer smoke)"
+echo "Config: configs/xpu/text/qwen2_5_xpu.yaml (sdpa attention, fsdp2 trainer smoke)"
 echo ""
 
 # Run torchrun with 2 XPU GPUs
@@ -37,7 +39,7 @@ torchrun \
     --model.model_path "$MODEL_PATH" \
     --data.train_path "$DATASET_DIR/fineweb" \
     --train.checkpoint.output_dir "Qwen2.5-0.5B-Instruct-sft-xpu" \
-    --train.accelerator.fsdp_config.fsdp_mode fsdp1 \
+    --train.accelerator.fsdp_config.fsdp_mode fsdp2 \
     --train.num_train_epochs 1 \
     --train.max_steps 5 \
     --train.wandb.enable false

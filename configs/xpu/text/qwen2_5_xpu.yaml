@@ -2,6 +2,10 @@ model:
   model_path: Qwen/Qwen2.5-0.5B-Instruct
   ops_implementation:
     attn_implementation: sdpa
+    cross_entropy_loss_implementation: eager
+    rms_norm_implementation: eager
+    swiglu_mlp_implementation: eager
+    rotary_pos_emb_implementation: eager
 
 data:
   train_path: fineweb
@@ -19,9 +23,7 @@ train:
   accelerator:
     ulysses_size: 1
     fsdp_config:
-      fsdp_mode: fsdp1
-      full_shard: true
-      offload: false
+      fsdp_mode: fsdp2
       mixed_precision:
         enable: true
     offload:

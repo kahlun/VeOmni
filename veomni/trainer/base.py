@@ -213,7 +213,7 @@ class BaseTrainer(Stateful, ABC):
 
         # Initialize distributed process group
         if not dist.is_initialized():
-            dist.init_process_group(backend=get_dist_comm_backend())
+            dist.init_process_group(backend=get_dist_comm_backend(), device_id=self.device)
 
         logger.info(f"Process rank: {self.args.train.global_rank}, world size: {self.args.train.world_size}")
 
