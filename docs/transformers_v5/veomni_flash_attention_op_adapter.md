@@ -48,7 +48,7 @@ For VeOmni names, the adapter returns a kernel-like object exposing:
 mapped to local or explicitly selected Hub FA2/FA3/FA4/AITER backends:
 
 - `veomni_flash_attention_2` -> `flash_attn.flash_attn_func` / `flash_attn.flash_attn_varlen_func`
-- `veomni_flash_attention_2_hub` -> pinned `kernels-community/flash-attn2` version 1 functions
+- `veomni_flash_attention_2_hub` -> pinned `kernels-community/flash-attn2` version 1 functions (version 3 on Intel XPU, which has no XPU build at versions 1 and 2)
 - `veomni_flash_attention_3` -> `flash_attn_interface.flash_attn_func` / `flash_attn_interface.flash_attn_varlen_func`
 - `veomni_flash_attention_3_hub` -> pinned `kernels-community/flash-attn3` version 1 functions
 - `veomni_flash_attention_4` -> `flash_attn.cute.flash_attn_func` / `flash_attn.cute.flash_attn_varlen_func`
