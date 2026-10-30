@@ -98,6 +98,19 @@ _original_load_and_register_attn_kernel: Callable | None = None
 _veomni_hub_kernel_loader_patch_applied = False
 
 
+_HUB_FLASH_KERNEL_VERSION = 1
+# kernels-community major versions 1 and 2 ship no Intel XPU build; 3 does
+# (verified against torch 2.14.0+xpu with kernels 0.16.2).
+_HUB_FLASH_KERNEL_VERSION_BY_DEVICE = {"xpu": 3}
+
+
+def _hub_flash_kernel_version() -> int:
+    """Major Hub version to request for FlashAttention artifacts on this device."""
+    from ..utils.device import get_device_type
+
+    return _HUB_FLASH_KERNEL_VERSION_BY_DEVICE.get(get_device_type(), _HUB_FLASH_KERNEL_VERSION)
+
+
 @lru_cache(maxsize=None)
 def _load_hub_flash_kernel(repository: str):
     """Load a pinned Hub FlashAttention artifact through ``kernels``."""
@@ -106,7 +119,7 @@ def _load_hub_flash_kernel(repository: str):
     except ImportError as e:
         raise ImportError("VeOmni Hub FlashAttention implementations require `kernels` to be installed.") from e
 
-    return get_kernel(repository, version=1)
+    return get_kernel(repository, version=_hub_flash_kernel_version())
 
 
 def _load_veomni_local_flash_kernel(implementation: str) -> SimpleNamespace | object:
