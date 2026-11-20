@@ -29,7 +29,7 @@ from tests.ops.tol import ATTN_ATOL, ATTN_GRAD_ATOL, ATTN_GRAD_RTOL, ATTN_RTOL
 from tests.ops.utils import is_nvidia_cuda_available
 from veomni.ops import OP_REGISTRY, resolve_op
 from veomni.ops.kernels.attention.standard import flash as flash_backend
-from veomni.utils.device import IS_CUDA_AVAILABLE
+from veomni.utils.device import IS_CUDA_AVAILABLE, get_device_type
 
 
 class _FakeAttentionModule(nn.Module):
@@ -313,7 +313,8 @@ def test_flash_attention_preserves_layout_and_backend_contract(monkeypatch):
     assert attention_weights is None
 
 
-def test_flash_attention_fp32_query_follows_autocast_of_the_query_device(monkeypatch):
+@pytest.mark.parametrize("device_type", sorted({"cpu", get_device_type()}))
+def test_flash_attention_fp32_query_follows_autocast_of_the_query_device(monkeypatch, device_type):
     """An fp32 query under autocast must be cast to that device's autocast dtype.
 
     ``torch.is_autocast_enabled()`` without a device only reflects CUDA autocast, so this
@@ -329,13 +330,13 @@ def test_flash_attention_fp32_query_follows_autocast_of_the_query_device(monkeyp
     monkeypatch.setattr(flash_backend, "should_apply_ulysses", lambda *, skip_ulysses=False: False)
 
     module = _FakeAttentionModule("veomni_flash_attention_2")  # fp32 Linear weight: the fallback dtype
-    query = torch.randn(2, 4, 3, 4, dtype=torch.float32)
+    query = torch.randn(2, 4, 3, 4, dtype=torch.float32, device=device_type)
     key, value = query.clone(), query.clone()
 
     flash_backend.flash_attention_forward(module, query, key, value, None)
     assert captured["target_dtype"] == torch.float32  # no autocast: weight dtype
 
-    with torch.autocast(query.device.type, dtype=torch.bfloat16):
+    with torch.autocast(device_type, dtype=torch.bfloat16):
         flash_backend.flash_attention_forward(module, query, key, value, None)
     assert captured["target_dtype"] == torch.bfloat16
 
